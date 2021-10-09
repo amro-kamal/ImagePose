@@ -20,12 +20,21 @@ import matplotlib.pyplot as plt; plt.rcdefaults()
 #TODO
 #1- ImagePoseData class
 
-#To delete the .DS_Store file (ON MacOS ONLY) use the command: find . -name '.#DS_Store' -type f -delete
-jeep=609; bench=703; ambulance=407; traffic_light=920; forklift=561; umbrella=879;
+#To delete the .DS_Store file (needed for MacOS ONLY) use the command: find . -name '.#DS_Store' -type f -delete
+jeep=609; bench=703; ambulance=407; traffic_light=920; forklift=561; umbrella=879; airliner=404; 
+assault_rifle=413; white_shark=2; cannon=471; mug=504; keyboard=508
 class ImagePoseData(Dataset):
 
     def __init__(self, root_dir, transform=None):
         self.p = os.listdir(root_dir)
+        try:
+          self.p.remove('.DS_Store')
+        except:
+          print("No .DS_Store file")
+
+          
+        
+
         self.transform = transform
         self.root_dir = root_dir
         self.objects = {'jeep':609, 'bench':703, 'ambulance':407, 'traffic_light':920, 'forklift':561, 'umbrella':879}
@@ -55,13 +64,18 @@ def run_model(model, dataloader, imagenet_classes, correct_class, savepath,  pos
         savepath: path to save the model_log.txt file and model_result.txt file
         model_zoo: ['torchvision', 'modelvshuman', 'clip']
     return:
-        clip_log.txt: top1, top5, correct_t_conf, correct_f_conf, wrong_conf
-        clip_result.txt: result [image: 'correct' or 'wrong']
+        <model_name>_log.txt: a table contains: top1, top5, correct_t_conf, correct_f_conf, wrong_conf
+        <model_name>_result.txt: result [image: 'correct' or 'wrong']
+
+        <model_name>_result.yml: result_dict (yaml copy of <model_name>_resut.txt)
+        <model_name>_result5.yml: result_dict5 {image_name: [correct/wrong , ids, probs]}
+        <model_name>_top5_file.txt: top5 preds tables
     '''
+    print(f'Running {model_name} on the {true_class}/{pose} data')
     correct_t_conf, correct_f_conf, wrong_conf=[], [], []
-    result = {} #dict to save the either the top1 class is the ture class for each image (image_name: correct/wrong).
+    result_dict = {} #dict to save the either the top1 class is the ture class for each image {(image_name: correct/wrong)}.
     result_file = open (os.path.join(savepath, model_name+"_result.txt"), "w") #file to save the resut dictionary.
-    result5 = {}  #dict to save the if the true class is among the top5 preds  (image_name: correct/wrong).
+    result_dict5 = {}  #dict to save the if the true class is among the top5 preds  {image_name: [correct/wrong , ids, probs]}.
     log = open (os.path.join(savepath, model_name+"_log.txt"), "w") #summary table
     top5_file = open (os.path.join(savepath, model_name+"_top5.txt"), "a")
     correct5, correct=0,0
@@ -77,7 +91,6 @@ def run_model(model, dataloader, imagenet_classes, correct_class, savepath,  pos
           output = torch.tensor(output)
           probs = output.softmax(dim=-1)
 
-  
         elif model_zoo=='clip':
           # batch, names=next(iter(dataloader))
           image_input = batch.to(device) #preprocess(batch).unsqueeze(0).to(device)
@@ -96,16 +109,16 @@ def run_model(model, dataloader, imagenet_classes, correct_class, savepath,  pos
         #top5
         if true_class in indices[i]: #indices[i].shape = [5]
           correct5+=1
-          result5[names[i]] = ['correct', indices[i].tolist(), values[i].tolist()]
+          result_dict5[names[i]] = ['correct', indices[i].tolist(), values[i].tolist()]
         else:
-          result5[names[i]] = ['wrong', indices[i].tolist(), values[i].tolist()]
+          result_dict5[names[i]] = ['wrong', indices[i].tolist(), values[i].tolist()]
         #top1
         if true_class==indices[i][0]:
           correct+=1
-          result[names[i]] = 'correct'
+          result_dict[names[i]] = 'correct'
           correct_t_conf.append(values[i][0].item())
         else:
-          result[names[i]] = 'wrong'
+          result_dict[names[i]] = 'wrong'
           wrong_conf.append(values[i][0].item())
           correct_f_conf.append(probs[i][correct_class].item())
         
@@ -131,33 +144,38 @@ def run_model(model, dataloader, imagenet_classes, correct_class, savepath,  pos
     print (table)
     log.write('\n'+table+'\n')
     log.close()
-    result_file.write('\n'+str(result)+'\n')
+    result_file.write('\n'+str(result_dict)+'\n')
     result_file.close()
-    print(result)
+    # print(result_dict)
     #Save result dict and result5 dict to .yml files
     with open(os.path.join(savepath,model_name+'_result.yml'), 'w') as file:
-      yaml_file = yaml.dump(result, file)
+      yaml_file = yaml.dump(result_dict, file)
     with open(os.path.join(savepath,model_name+'_result5.yml'), 'w') as file:
-      yaml_file = yaml.dump(result5, file)
+      yaml_file = yaml.dump(result_dict5, file)
 
-    return correct, correct5, np.mean(correct_t_conf), np.mean(correct_f_conf), np.mean(wrong_conf), result, result5
+    return correct, correct5, np.mean(correct_t_conf), np.mean(correct_f_conf), np.mean(wrong_conf), result_dict, result_dict5
 
 #############################
 def rename_img(model_name, images_path,names_file, names_file5, save_path,pose='pose', correct_class=609):
     '''
-    Load the images from images_path and rename them according to the clasifications (correct/wrong) from the names_file.yml file
-    then save them to the save_path
+    1-Loads the images from images_path and rename them according to the clasifications (correct/wrong) from the names_file.yml file
+    then save them to the save_path.
+    2-Creates top5 barcharts from the names_file5.yml file.
     '''
+    i=0
     with open(names_file5, "r") as ymlfile:
-       result5 = yaml.load(ymlfile)
-
+        result5 = yaml.load(ymlfile)
     with open(names_file, "r") as ymlfile:
         result = yaml.load(ymlfile)
     for (image_name, classification) in result.items():
+        if i%10==0:
+          print(f'image num {i} ...')
+        i+=1
         image = Image.open(os.path.join(images_path, image_name))
         class_name = image_name.split('.')[0].split('_')[0]
         if pose=='yaw' or pose=='pitch' or pose=='roll':
             p1 = image_name.split('.')[0].split('_')[-1]
+            p2=0
             new_name = '_'.join([class_name, model_name, pose, p1, classification+'.png'])
         else:
             p1=image_name.split('.')[0].split('_')[-2]
@@ -165,7 +183,9 @@ def rename_img(model_name, images_path,names_file, names_file5, save_path,pose='
             new_name = '_'.join([class_name, model_name, pose, p1, p2, classification+'.png'])
         image.save(os.path.join(save_path, 'renamed_images', new_name))
 
-        indices, values = result5[image_name][1], result5[image_name][2]
+
+
+        indices, values = result5[image_name][1], result5[image_name][2] #result5 = {image_name: [correct/wrong , indices, probs]}
         objects = tuple([imagenet_classes[indices[c]].split(',')[0] for c in range(len(indices))][::-1])
         color = ['green' if indices[c]==correct_class else 'cyan' for c in range(len(indices))][::-1]
         probs = values[::-1]
@@ -174,9 +194,9 @@ def rename_img(model_name, images_path,names_file, names_file5, save_path,pose='
         plt.yticks(y_pos, objects)
         plt.xlabel('probability')
         plt.ylabel('classes')
-        plt.title('Topk probabilities')
+        plt.title(f'Top5 probabilities | {pose} degrees: {p1} & {p2}')
         plt.savefig(os.path.join(save_path, 'barplots', new_name),dpi=400)
-        plt.show()
+        # plt.show()
         plt.close()
 
 def create_video(data_root_path):
@@ -203,27 +223,23 @@ def create_video(data_root_path):
 
       # back_im.save(os.path.join(data_root_path, 'renamed_images', img_name))
       barplot_img = Image.open(os.path.join(data_root_path, 'barplots', img_name))
-      barplot_img = barplot_img.resize((224, 150))
+      barplot_img = barplot_img.resize((299, 299))
 
 
-      img2 = Image.new("RGB", (500, 90), "white")
+      img2 = Image.new("RGB", (598, 299), "white")
       img2.paste(back_im, (0, 0))  
-      img2.paste(barplot_img, (250, 0))
-      img2.save(os.path.join(data_root_path, 'renamed_images', img_name))
+      img2.paste(barplot_img, (299, 0))
+      img2.save(os.path.join(data_root_path, 'joined_renamed_images', img_name))
 
       plt.imshow(img2)
-      plt.cose()
-
-
-
-
+      plt.close()
 
 
     # 2- Create the video
     print('creating the video')
     img_array = []
 
-    for filename in sort_alphanumerically(glob.glob(os.path.join(data_root_path,'renamed_images/*.png'))):
+    for filename in sort_alphanumerically(glob.glob(os.path.join(data_root_path,'joined_renamed_images/*.png'))):
         img = cv2.imread(filename)
         
         height, width, layers = img.shape
@@ -231,13 +247,13 @@ def create_video(data_root_path):
         img_array.append(img)
 
     
-    out = cv2.VideoWriter(os.path.join(savepath,model_name+'_video.mp4'),cv2.VideoWriter_fourcc(*'DIVX'), 3, size)
+    out = cv2.VideoWriter(os.path.join(savepath[0],model_name+'_video.mp4'),cv2.VideoWriter_fourcc(*'DIVX'), 5, size)
     for i in range(len(img_array)):
         out.write(img_array[i])
     out.release()
 
 
-    out = cv2.VideoWriter(os.path.join(savepath,model_name+'_fast_video_top5.mp4'),cv2.VideoWriter_fourcc(*'DIVX'), 5, size)
+    out = cv2.VideoWriter(os.path.join(savepath[0],model_name+'_fast_video_top5.mp4'),cv2.VideoWriter_fourcc(*'DIVX'), 8, size)
     for i in range(len(img_array)):
         out.write(img_array[i])
 
@@ -251,16 +267,18 @@ if __name__=='__main__':
     model_name = 'Clip-ViT-B-32'
     model_zoo = 'clip'
 
-    jeep=609; bench=703; ambulance=407; traffic_light=920; forklift=561; umbrella=879;
+    jeep=609; bench=703; ambulance=407; traffic_light=920; forklift=561; umbrella=879; airliner=404; 
+    assault_rifle=413; white_shark=2; cannon=471; mug=504; keyboard=508
+
     correct_class = jeep
 
     clip_model, preprocess = clip.load("ViT-B/32", device=device)
-    # model = Model(device,model_name='inceptionv3').to(device) 
+    # inceptionv3 = Model(device,model_name='inception_v3').to(device) 
 
-    pose = 'rollpitch'
+    pose = 'roll'
 
-    savepath  = "data/360/ROLLPITCH/bg1/jeep_ROLLPITCH_360/model_result/clip"
-    data_root_path = "data/360/ROLLPITCH/bg1/jeep_ROLLPITCH_360"
+    savepath  = ["data/360/ROLL/bg1/jeep_ROLL_360/model_result/clip", "data/360/ROLL/bg2/jeep_ROLL_360/model_result/clip", "data/360/ROLL/nobg/jeep_ROLL_360/model_result/clip"]
+    data_root_path = ["data/360/ROLL/bg1/jeep_ROLL_360", "data/360/ROLL/bg2/jeep_ROLL_360", "data/360/ROLL/nobg/jeep_ROLL_360"]
     batch_size = 360
 
     ######################################################################
@@ -270,21 +288,23 @@ if __name__=='__main__':
         transforms.ToTensor(),
 
     ])
-    data = ImagePoseData(os.path.join(data_root_path, 'images'),transform=preprocess)
+    data = ImagePoseData(os.path.join(data_root_path[0], 'images'),transform=preprocess)
     mydataloader = DataLoader(data, batch_size=batch_size, shuffle=False, num_workers=2)
     #######################################################################
     # # run the model and save the log.txt and result.txt files to the savepath
-    # correct, correct5, correct_t_conf, correct_f_conf, wrong_conf, result, result5 =  run_model(clip_model, mydataloader,list(imagenet_classes.values()), correct_class, savepath, pose=pose, model_name=model_name, model_zoo=model_zoo, true_class=jeep)
+    # correct, correct5, correct_t_conf, correct_f_conf, wrong_conf, result, result5 =  run_model(clip_model, mydataloader,
+    #                                                                           list(imagenet_classes.values()), correct_class, savepath[0], 
+    #                                                                        pose=pose, model_name=model_name, model_zoo=model_zoo, true_class=jeep)
     #######################################################################
 
-    # rename the images with the classifications 
-    print('renaming images')
-    rename_img(model_name=model_name, images_path=os.path.join(data_root_path, 'images'),
-              names_file=os.path.join(savepath,model_name+'_result.yml'), names_file5=os.path.join(savepath,model_name+'_result5.yml'), 
-              save_path=data_root_path, pose=pose, correct_class=correct_class)
+    # # rename the images with the classifications 
+    # print('renaming images')
+    # rename_img(model_name=model_name, images_path=os.path.join(data_root_path[0], 'images'),
+    #           names_file=os.path.join(savepath[0], model_name+'_result.yml'), names_file5=os.path.join(savepath[0], model_name+'_result5.yml'), 
+    #           save_path=data_root_path[0], pose=pose, correct_class=correct_class)
 
-    # Create a video from the images
-    create_video(data_root_path)
+    # # Create a video from the images
+    create_video(data_root_path[0])
 
 
 
