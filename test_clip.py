@@ -173,14 +173,15 @@ def rename_img(model_name, images_path,names_file, names_file5, save_path,pose='
         i+=1
         image = Image.open(os.path.join(images_path, image_name))
         class_name = image_name.split('.')[0].split('_')[0]
+        
         if pose=='yaw' or pose=='pitch' or pose=='roll':
             p1 = image_name.split('.')[0].split('_')[-1]
             p2=0
-            new_name = '_'.join([class_name, model_name, pose, p1, classification+'.png'])
+            new_name = '_'.join([class_name, model_name, pose, p1, classification+image_name.split('.')[1]])
         else:
             p1=image_name.split('.')[0].split('_')[-2]
             p2=image_name.split('.')[0].split('_')[-1]
-            new_name = '_'.join([class_name, model_name, pose, p1, p2, classification+'.png'])
+            new_name = '_'.join([class_name, model_name, pose, p1, p2, classification+image_name.split('.')[1]])
         image.save(os.path.join(save_path, 'renamed_images', new_name))
 
 
@@ -199,7 +200,7 @@ def rename_img(model_name, images_path,names_file, names_file5, save_path,pose='
         # plt.show()
         plt.close()
 
-def create_video(data_root_path):
+def create_video(data_root_path, savepath):
       # 1-Add the classification tag to the images
 
     print('adding tags to the images')
@@ -239,7 +240,7 @@ def create_video(data_root_path):
     print('creating the video')
     img_array = []
 
-    for filename in sort_alphanumerically(glob.glob(os.path.join(data_root_path,'joined_renamed_images/*.png'))):
+    for filename in sort_alphanumerically(glob.glob(os.path.join(data_root_path,'joined_renamed_images/*.*'))):
         img = cv2.imread(filename)
         
         height, width, layers = img.shape
@@ -247,13 +248,13 @@ def create_video(data_root_path):
         img_array.append(img)
 
     
-    out = cv2.VideoWriter(os.path.join(savepath[0],model_name+'_video.mp4'),cv2.VideoWriter_fourcc(*'DIVX'), 5, size)
+    out = cv2.VideoWriter(os.path.join(savepath, model_name+'_video.mp4'),cv2.VideoWriter_fourcc(*'DIVX'), 5, size)
     for i in range(len(img_array)):
         out.write(img_array[i])
     out.release()
 
 
-    out = cv2.VideoWriter(os.path.join(savepath[0],model_name+'_fast_video_top5.mp4'),cv2.VideoWriter_fourcc(*'DIVX'), 8, size)
+    out = cv2.VideoWriter(os.path.join(savepath, model_name+'_fast_video_top5.mp4'),cv2.VideoWriter_fourcc(*'DIVX'), 8, size)
     for i in range(len(img_array)):
         out.write(img_array[i])
 
@@ -282,29 +283,32 @@ if __name__=='__main__':
     batch_size = 360
 
     ######################################################################
-    data_transform = transforms.Compose([
-        transforms.Resize(size=224),
-        transforms.CenterCrop(size=(224, 224)),
-        transforms.ToTensor(),
+    for i in range(len(savepath)):
 
-    ])
-    data = ImagePoseData(os.path.join(data_root_path[0], 'images'),transform=preprocess)
-    mydataloader = DataLoader(data, batch_size=batch_size, shuffle=False, num_workers=2)
-    #######################################################################
-    # # run the model and save the log.txt and result.txt files to the savepath
-    # correct, correct5, correct_t_conf, correct_f_conf, wrong_conf, result, result5 =  run_model(clip_model, mydataloader,
-    #                                                                           list(imagenet_classes.values()), correct_class, savepath[0], 
-    #                                                                        pose=pose, model_name=model_name, model_zoo=model_zoo, true_class=jeep)
-    #######################################################################
+      data_transform = transforms.Compose([
+          transforms.Resize(size=224),
+          transforms.CenterCrop(size=(224, 224)),
+          transforms.ToTensor(),
+      ])
 
-    # # rename the images with the classifications 
-    # print('renaming images')
-    # rename_img(model_name=model_name, images_path=os.path.join(data_root_path[0], 'images'),
-    #           names_file=os.path.join(savepath[0], model_name+'_result.yml'), names_file5=os.path.join(savepath[0], model_name+'_result5.yml'), 
-    #           save_path=data_root_path[0], pose=pose, correct_class=correct_class)
+      data = ImagePoseData(os.path.join(data_root_path[i], 'images'),transform=preprocess)
+      mydataloader = DataLoader(data, batch_size=batch_size, shuffle=False, num_workers=2)
+    ######################################################################
+    # run the model and save the log.txt and result.txt files to the savepath
 
-    # # Create a video from the images
-    create_video(data_root_path[0])
+      correct, correct5, correct_t_conf, correct_f_conf, wrong_conf, result, result5 =  run_model(clip_model, mydataloader,
+                                                                              list(imagenet_classes.values()), correct_class, savepath[i], 
+                                                                           pose=pose, model_name=model_name, model_zoo=model_zoo, true_class=jeep)
+    ######################################################################
+
+      # rename the images with the classifications 
+      print('renaming images')
+      rename_img(model_name=model_name, images_path=os.path.join(data_root_path[i], 'images'),
+                names_file=os.path.join(savepath[i], model_name+'_result.yml'), names_file5=os.path.join(savepath[i], model_name+'_result5.yml'), 
+                save_path=data_root_path[i], pose=pose, correct_class=correct_class)
+
+      # Create a video from the images
+      create_video(data_root_path[i], savepath[i])
 
 
 
