@@ -415,7 +415,7 @@ class Renderer:
             return (background_img.width, background_img.height)
         else:
             self.background = None
-            return (299, 299)
+            return (500, 500)
 
     def render(self):
         if self.background is not None:

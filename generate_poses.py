@@ -8,6 +8,9 @@ from renderer import Renderer
 from strike_utils import *
 import os
 import torchvision
+from model_vs_human.modelvshuman.models.pytorch.model_zoo import  vit_large_patch16_224
+from torchvision import transforms
+
 
 def get_start_params(z_samples=30, random_samples=10):
     """Find good starting parameters.
@@ -350,7 +353,6 @@ def dict2array(param_dict):
 
     return np.array(param_array)
 
-
 def array2dict(param_array):
     """Convert an array of parameters to a dictionary of parameters.
 
@@ -448,32 +450,46 @@ def classify(data_path,true_class,savepath):
     log = open (os.path.join(savepath,"log_jeep_rs_bg_inceptionv3.txt"), "a")
 
     # for image_path in images:
-    for i in range(1000):
-        image = Image.open(os.path.join(data_path, f'rs_jeep{i}.png'))
+    # for i in range(1000):
+    for img_name in os.listdir(data_path):
+        if img_name == '.DS_Store':
+            continue
+        # image = Image.open(os.path.join(data_path, f'rs_jeep{i}.png'))
+        image = Image.open(os.path.join(data_path, img_name))
 
+        preprocess = transforms.Compose( [ 
+                # transforms.Scale(224),
+                transforms.Resize(size=224),
+                transforms.CenterCrop(size=(224, 224)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ]
+        )
         with torch.no_grad():
             out = MODEL(image)
-
+            # image = preprocess(image)
+            # out = torch.tensor(MODEL.forward_batch(image[None,:,:,:].to(device)))
+        
         probs = torch.nn.functional.softmax(out, dim=1)
-        print('inceptionv3 probability for the correct class',probs[0][TRUE_CLASS].item())
         values5, indices5 = probs[0].topk(5)
-        if TRUE_CLASS in indices5:
+        print('inceptionv3 probability for the correct class',probs[0][true_class].item(), indices5)
+        
+        if true_class in indices5:
           correct5+=1
 
         probs_np = probs[0].detach().cpu().numpy()
         max_index = probs_np.argmax()
-        if max_index == TRUE_CLASS:
+        if max_index == true_class:
             correct+=1
-            correct_t_conf.append(probs[0][TRUE_CLASS].item())
+            correct_t_conf.append(probs[0][true_class].item())
             print(f'correct')
         else:
             wrong_conf.append(probs[0][max_index].item())
-            correct_f_conf.append(probs[0][TRUE_CLASS].item())
+            correct_f_conf.append(probs[0][true_class].item())
 
             print(f'wrong')
-
                         
-        print(f'accuracy : {correct}/360, top5: {correct5}, correct_t_conf: {np.mean(correct_t_conf)}, wrong_conf: {np.mean(wrong_conf)}, correct_f_conf: {np.mean(correct_f_conf)}')
+        print(f'image: {img_name}, accuracy : {correct}/360, top5: {correct5}, correct_t_conf: {np.mean(correct_t_conf)}, wrong_conf: {np.mean(wrong_conf)}, correct_f_conf: {np.mean(correct_f_conf)}')
         log.write(f'pose: {all}, accuracy : {correct}/360, top5: {correct5}, correct_t_conf: {np.mean(correct_t_conf)}, wrong_conf: {np.mean(wrong_conf)}, correct_f_conf: {np.mean(correct_f_conf)} \n')
 
     correct_t_conf = np.mean(correct_t_conf)
@@ -486,11 +502,14 @@ def classify(data_path,true_class,savepath):
     log.close()
     print (table)
 
-
     return correct , correct/len(images) , correct5, correct5/len(images)
 
 if __name__ == "__main__":
-    jeep=609; bench=703; ambulance=407; traffic_light=920; forklift=561; umbrella=879;
+    jeep = 609; bench = 703; ambulance = 407; traffic_light = 920; forklift = 561; umbrella = 879; tank = 847; garbagetruck = 569
+    tractor = 866; electriclocomotive = 547; wheelbarrow = 428; mountainbike = 671; tablelamp = 846; parkbench=703;
+    diningtable = 532; foldingchair=559 ;  cannon=471;  airliner=404; rockingchair=765; shoppingcart=791;
+    trafficlight=920; barberchair = 423; hammerhead=4 ; fireengine =555
+
     TARGET_CLASS=jeep
     bgpath = "backgrounds/medium.jpg"
 
@@ -498,7 +517,10 @@ if __name__ == "__main__":
         OBJ_PATH, MTL_PATH, bgpath, camera_distance=CAMERA_DISTANCE, angle_of_view=ANGLE_OF_VIEW
     )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    MODEL = Model(device).to(device)
+    MODEL =    Model(device, model_name='resnet50').to(device) # 
+    # MODEL = vit_large_patch16_224("vit_large_patch16_224")
+    
+
     CRITERION = nn.CrossEntropyLoss()
     LABELS = torch.LongTensor([TARGET_CLASS]).to(device) #troch.tensor([635])
     LABEL_MAP = load_imagenet_label_map()
@@ -532,8 +554,17 @@ if __name__ == "__main__":
     #     (start_params, start_loss, best_zs) = get_start_params()
     #     (best_prob, best_iter, best_params, first_hit) = run_cma_es(start_params)
     # jeep=609; bench=703
+    obj='fireengine'
+    if not os.path.exists(f'newdata/datavalidation/{obj}'):
+        os.mkdir(f'newdata/datavalidation/{obj}')
+    if not os.path.exists(f'newdata/datavalidation/{obj}/images'):
+        os.mkdir(f'newdata/datavalidation/{obj}/images')
+    # print('correct , top1 , correct5, top5',classify('data/random_search/jeep_rs_output/bg',true_class=jeep,savepath='data/random_search/jeep_rs_output'))
+    print('correct , top1 , correct5, top5',classify(f'newdata/datavalidation/{obj}/images', true_class=fireengine,savepath='data/random_search/jeep_rs_output'))
+    inceptionv3 = torchvision.models.inception_v3(pretrained=True)
+    # image_class = class_act_map(inceptionv3.eval(), image_path='zrs_output/zrs_jeep4.png',show_images=True)
+    print(image_class)
+    
 
-    print('correct , top1 , correct5, top5',classify('data/random_search/jeep_rs_output/bg',true_class=jeep,savepath='data/random_search/jeep_rs_output'))
-    # inceptionv3 = torchvision.models.inception_v3(pretrained=True)
-    # # image_class = class_act_map(inceptionv3.eval(), image_path='zrs_output/zrs_jeep4.png',show_images=True)
-    # print(image_class)
+#'newdata/datavalidation/wheelbarrow/images'
+#newdata/360/ROLL/bg1/jeep_ROLL_360/images

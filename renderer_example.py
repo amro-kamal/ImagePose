@@ -9,10 +9,10 @@ if __name__ == "__main__":
 
     # Initialize renderer.
     renderer = Renderer(
-        "objects/white_shark/white_shark.obj", "objects/white_shark/white_shark.mtl", "backgrounds/medium.jpg"
+        "objects/fireengine/fireengine.obj", "objects/fireengine/fireengine.mtl"
     )
 
-    # Render scene.
+    # Render scene
     save = False
     image = renderer.render()
     if save:
@@ -31,10 +31,11 @@ if __name__ == "__main__":
     # Alter renderer parameters.
     R_obj = gen_rotation_matrix(np.pi / 4, np.pi / 4, 0)
     renderer.prog["R_obj"].write(R_obj.T.astype("f4").tobytes())
-    renderer.prog["x"].value = 0.5
-    renderer.prog["y"].value = 0.5
-    renderer.prog["z"].value = -4
-    renderer.prog["amb_int"].value = 0.3
+    renderer.prog["x"].value = 0.0
+    renderer.prog["y"].value = 0.0
+    renderer.prog["z"].value = -2
+
+    renderer.prog["amb_int"].value = 0.7
     renderer.prog["dif_int"].value = 0.9
     DirLight = np.array([1.0, 1.0, 1.0])
     DirLight /= np.linalg.norm(DirLight)

@@ -47,7 +47,6 @@ class Model(nn.Module):
         out = self.net(image_normalized[None, :, :, :].to(self.device))
         return out
 
-
 def gen_rotation_matrix(yaw=0.0, pitch=0.0, roll=0.0):
     """Generate a rotation matrix from yaw, pitch, and roll angles (in radians).
 

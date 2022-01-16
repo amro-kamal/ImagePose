@@ -1,0 +1,104 @@
+tank
+   ROLL:   R_obj = gen_rotation_matrix(np.pi/2, degreep, np.pi/10)  #yaw, pitch, roll
+   PITCH: gen_rotation_matrix(np.pi/2.8, 0, degreep), 
+   YAW: gen_rotation_matrix(np.pi/10, degreep, 0)  #yaw, pitch, roll
+
+
+forklift:
+  ROLL:  [gen_rotation_matrix(np.pi/2.5, degreep, np.pi/20) , -9 , 0.8]
+  PITCH: [gen_rotation_matrix(np.pi/2.8, 0, degreep) , -9, 0.8]
+  YAW: [gen_rotation_matrix(np.pi/10, degreep, 0), -9, 0.8]
+
+garbagetruck:
+   ROLL: [gen_rotation_matrix(np.pi/10, 0, degreep)  , -6 , 1.3]
+   PITCH: gen_rotation_matrix(np.pi/10, degreep, 0) , -6, 1.3]
+   YAW: [gen_rotation_matrix(-np.pi/1.5, 0, degreep), -5.5, 1.3]
+
+tractor:
+   ROLL: [gen_rotation_matrix(np.pi/1.5, degreep, np.pi/0.97), 1.1, -7]
+   PITCH: gen_rotation_matrix(-np.pi/1.5, 0, degreep+np.pi) , , -7, 1.1]
+   YAW: [gen_rotation_matrix(np.pi/10, degreep+np.pi, 0), -7, 0.9]
+
+electriclocomotive:
+   ROLL: [gen_rotation_matrix(np.pi/2.3, degreep, 0) , -6, 1.1] #bg1, nobg
+         [gen_rotation_matrix(np.pi/5, degreep+np.pi/30, 0), -4.8, 1.1] bg2
+   PITCH: [gen_rotation_matrix(np.pi/2.3, 0, degreep), -6, 1.1]
+         [gen_rotation_matrix(np.pi/5, np.pi/30, degreep), -4.8, 1.1 ] #bg2
+   YAW:  [gen_rotation_matrix(0, np.pi/50, degreep), (0,0,-2.2), 1.1] #bg1, nobg
+         [gen_rotation_matrix(np.pi/4.2, np.pi/30 , degreep), (-0.3, 0, -2.4) ,1.1]  #bg2
+
+wheelbarrow: 
+   ROLL:  [gen_rotation_matrix(0, np.pi/10, degreep-np.pi/30), -6, 1]  ,#bg2, nobg=-6.5
+   PITCH: [gen_rotation_matrix(0, degreep+np.pi/10, -np.pi/30) , -6, 1] , #bg2, nobg=-6.5
+   YAW: [gen_rotation_matrix(-np.pi/2.2, 0, degreep) , -6 , 1]
+
+
+mountainbike:
+   ROLL: [gen_rotation_matrix(np.pi+np.pi/10, -np.pi/60, degreep) , (0,.-0.2,-5), 1]
+   PITCH: gen_rotation_matrix(np.pi/1.5, 0, degreep) , (0,-0.2,-5.5), 1
+   YAW: [gen_rotation_matrix(degreep+np.pi/2, np.pi/60, 0) , (0,-0.1,-7), 1] #bg2 -0.3
+
+
+fireengine:
+   ROLL: [gen_rotation_matrix(np.pi/10, np.pi/20, degreep), (0, 0.05, -5.5), 0.9] #-6
+   PITCH: [gen_rotation_matrix(np.pi/2.7, 0, degreep+np.pi/45), (0, 0.05, -5.5), 0.9]
+   YAW:  [gen_rotation_matrix(np.pi/10, degreep+np.pi/20, 0), (0, 0.05, -5.5), 0.9]
+
+jeep:
+   ROLL: [gen_rotation_matrix(np.pi/3.3,degreep+np.pi/90, 0) , -6.5, 1.2]
+   YAW: [gen_rotation_matrix(np.pi/10,np.pi/90, degreep)   , -5.5 ,1.2]
+   PITCH: []
+
+tablelamp:
+   ROLL: [ gen_rotation_matrix(-np.pi/20, -np.pi/20, degreep) , -6 , 1]
+   PITCH: [ gen_rotation_matrix(-np.pi/20, degreep, 0) , -6, 1]
+   YAW: [ gen_rotation_matrix(0, degreep, np.pi/5) , -6 , 1]
+
+parkbench:
+   ROLL: [gen_rotation_matrix(-np.pi/2, degreep, -np.pi/15), (0, -0.1, -8.5), 1.2]
+   PITCH: [gen_rotation_matrix(-np.pi/2.5, 0, degreep),  (0, -0.1, -8.5), 1.2]
+   YAW: [ gen_rotation_matrix(degreep-np.pi/2, 0, 0) , (0, -0.3, -8.5), 1.2]
+
+diningtable:
+   ROLL: [ gen_rotation_matrix(-np.pi/2.5, degreep, -np.pi/60), (0, -0.35, -7), 1] # bg2 (0, -0.45, -7)   / nobg  (0, 0, -7) -np.pi/40
+   PITCH: [gen_rotation_matrix(-np.pi/2, 0, degreep-np.pi/45), (0, -0.6, -7),  0.9]
+   YAW: [gen_rotation_matrix(-np.pi/3.5, 0, degreep-np.pi/60) , (0, -4.5, -7), 1] #bg2 (0, -5, -7)  / nobg  (0, 0, -7) -np.pi/30
+
+foldingchair:
+   ROLL: [ gen_rotation_matrix(np.pi/1.35, -np.pi/30, degreep+np.pi/30) , (0,0,-7), 0.75] #bg2 gen_rotation_matrix(np.pi/1.5, -np.pi/15, degreep+np.pi/15)
+   PITCH: [ gen_rotation_matrix(np.pi/1.35, degreep-np.pi/30, +np.pi/30) , (0,0,-7), 0.75] #bg2 gen_rotation_matrix(np.pi/1.5, degreep-np.pi/15, +np.pi/15)
+   YAW: [ gen_rotation_matrix(degreep+np.pi/1.35, -np.pi/30, +np.pi/30) , (0,0,-7), 0.75] #bg2 gen_rotation_matrix(degreep+np.pi/1.5, -np.pi/15, +np.pi/15)
+
+cannon:
+   ROLL: [ gen_rotation_matrix(np.pi/10, np.pi/30, degreep) , (0, 0, 0.65), -0.75 ]
+   PITCH: [ gen_rotation_matrix(np.pi/10, degreep+np.pi/30, 0) , (0, 0, 0.65), -0.75 ]
+   YAW: [ gen_rotation_matrix(degreep, 0, -np.pi/8) , (0, 0, 0.65), -0.75 ]
+
+airliner:
+   ROLL: [gen_rotation_matrix(np.pi/10, np.pi/15, degreep), (0, 0, 0.65), -0.75 ]
+   PITCH: [gen_rotation_matrix(np.pi/10, degreep+np.pi/15, np.pi/15), (0, 0, 0.65), -0.75 ]
+   YAW: [ gen_rotation_matrix(degreep+np.pi/10, 0, np.pi/15), (0, 0, 0.65), -0.75 ]
+
+rockingchair:
+   ROLL: [ gen_rotation_matrix(+np.pi/10, 0, degreep) , (0, 0, 0.75), -0.75 ]
+   PITCH: [ gen_rotation_matrix(+np.pi/10, degreep, 0),   (0, 0, 0.75), -0.75 ]
+   YAW: [ gen_rotation_matrix(degreep+np.pi/10, np.pi/5, 0), (0, 0, 0.75), -0.75 ]
+
+shoppingcart:
+   ROLL: [ gen_rotation_matrix(np.pi/3.5, degreep+np.pi/40, np.pi/30), (0, 0, 9), -0.7]
+   PITCH: [ gen_rotation_matrix(np.pi/3.5, +np.pi/40, degreep+np.pi/30), (0, 0, 9), -0.7 ]
+   YAW: [ gen_rotation_matrix(np.pi/40, +np.pi/40, degreep), (0, -0.2, 9), -0.7]
+
+barberchair:
+   ROLL: [  gen_rotation_matrix(np.pi/2.2, degreep, 0), (0,0,-8), 0.7]
+   PITCH: [ gen_rotation_matrix(np.pi/2.2, 0, degreep), (0,0,-8), 0.7]
+   YAW: [ gen_rotation_matrix(0, degreep, 0), (0,0,-8), 0.7]
+
+hammerhead:
+   ROLL: [ gen_rotation_matrix(-np.pi/10, -np.pi/10, degreep), (0,0,-7), 0.7]
+   PITCH: [ gen_rotation_matrix(-np.pi/10, degreep-np.pi/10, 0), (0,0,-7), 0.7]
+   YAW: [ gen_rotation_matrix(degreep-np.pi/10, -np.pi/10, 0), (0,0,-7), 0.7]
+
+
+
+  

@@ -4,8 +4,8 @@ from PIL import Image
 import os
 from tabulate import tabulate
 
-jeep=609; bench=703; ambulance=407; traffic_light=920; forklift=561; umbrella=879; airliner=404; 
-assault_rifle=413; white_shark=2; cannon=471; mug=504; keyboard=508
+jeep=609; brownjeep=609; bench=703; ambulance=407; traffic_light=920; forklift=561; umbrella=879; airliner=404; 
+assault_rifle=413; white_shark=2; cannon=471; mug=504; keyboard=508; tablelamp=846;
 
 # savepath_list = ["data/360/ROLL/bg1/airliner_ROLLPITCH_360/images", "data/360/ROLLPITCH/bg1/ambulance_ROLLPITCH_360/images",
 #                  "data/360/ROLLPITCH/bg1/loader_ROLLPITCH_360/images", "data/360/ROLLPITCH/bg1/brownjeep_ROLLPITCH_360/images"]
@@ -16,17 +16,30 @@ assault_rifle=413; white_shark=2; cannon=471; mug=504; keyboard=508
 # bgpath_list = ["backgrounds/sky.jpg", "backgrounds/sky.jpg", "backgrounds/sky.jpg", "backgrounds/sky.jpg"]
 # pose = 'rollpitch'
 
-TRUE_CLASS_list = ['tablelamp']
+# 1-choose an object
+# 2-choose a pose
+# 3-generate the images for all the bgs
+TRUE_CLASS_list = ['cannon']
+POSE = 'PITCH'
+pose = 'pitch' 
+bg = 'nobg'
 
-savepath_list = ["data/360/YAW/bg2/tablelamp_YAW_360/images"]
+savepath_list = [f"newdata/360/{POSE}/{bg}/{TRUE_CLASS_list[0]}_{POSE}_360/images"]
+objectpath_list = [(f"objects/{TRUE_CLASS_list[0]}/{TRUE_CLASS_list[0]}.obj", f"objects/{TRUE_CLASS_list[0]}/{TRUE_CLASS_list[0]}.mtl")]
+bgpath_list = [f"backgrounds/{TRUE_CLASS_list[0]}_{bg}_500.jpg"]
+validation_data_path = f"newdata/datavalidation/{TRUE_CLASS_list[0]}/images"
 
-objectpath_list = [("objects/tablelamp/tablelamp.obj", "objects/tablelamp/tablelamp.mtl")]
-
-bgpath_list = ["backgrounds/wall2_299.png" ]
-
-pose = 'yaw'
-
+if not os.path.exists(f"newdata/360/{POSE}/{bg}/{TRUE_CLASS_list[0]}_{POSE}_360"):
+  os.mkdir(f"newdata/360/{POSE}/{bg}/{TRUE_CLASS_list[0]}_{POSE}_360")
+if not os.path.exists(f"newdata/360/{POSE}/{bg}/{TRUE_CLASS_list[0]}_{POSE}_360/images"):
+  os.mkdir(f"newdata/360/{POSE}/{bg}/{TRUE_CLASS_list[0]}_{POSE}_360/images")
+obj=TRUE_CLASS_list[0]
+if not os.path.exists(f'newdata/datavalidation/{obj}'):
+    os.mkdir(f'newdata/datavalidation/{obj}')
+if not os.path.exists(f'newdata/datavalidation/{obj}/images'):
+    os.mkdir(f'newdata/datavalidation/{obj}/images')
 if __name__ == "__main__":
+
     # Initialize neural network.
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print('Running on ',device)
@@ -37,47 +50,46 @@ if __name__ == "__main__":
       TRUE_CLASS = TRUE_CLASS_list[obj]
       print(f'working on object: {objectpath_list[obj][0]} ...........')
       # Initialize renderer.
-      renderer = Renderer(
+      if bg=='nobg':
+          renderer = Renderer(objpath, mtlpath)
+      else:
+          renderer = Renderer(
           objpath, mtlpath, bgpath
-      )
-      # print(f'Default renderer parameters: ',renderer.prog["x"].value)
+          )
       
+      # print(f'Default renderer parameters: ',renderer.prog["x"].value)
       #########################    #########################
       #########################    #########################
       renderer.prog["x"].value = 0
       renderer.prog["y"].value = 0
-      renderer.prog["z"].value = -6
+      renderer.prog["z"].value = -6.5
       
-      renderer.prog["amb_int"].value = 0.3
-      renderer.prog["dif_int"].value = 0.9
+      renderer.prog["amb_int"].value = 0.75 #light
+      renderer.prog["dif_int"].value = 0.6
       DirLight = np.array([1.0, 1.0, 1.0])
       DirLight /= np.linalg.norm(DirLight)
       renderer.prog["DirLight"].value = tuple(DirLight)
       
-      
-      # for i in range(0,360,360):
-          # degreey = i * (np.pi / 180)
-      for j in range(0,360,1):
-        # Alter renderer parameters.
-        degreep = j * (np.pi / 180)
-     
-        R_obj = gen_rotation_matrix(degreep, np.pi/3.5 , 0)   #yaw, pitch, roll
+      for i in range(0,360,360):
+          degreey = i * (np.pi / 180)
+          for j in range(0,360,1):
+            # Alter renderer parameters.
+            degreep = j * (np.pi / 180)
+            
+            R_obj = gen_rotation_matrix(np.pi/10, degreep+np.pi/30, 0)#yaw, pitch, roll
+            # if j==0 or j==180:
+            #     renderer.prog["z"].value = -1
+            # else:
+            #     renderer.prog["z"].value = -4 
+            renderer.prog["R_obj"].write(R_obj.T.astype("f4").tobytes())
+            # Render new scene.
+            image = renderer.render()
 
-        renderer.prog["R_obj"].write(R_obj.T.astype("f4").tobytes())
-        # Render new scene.
-        image = renderer.render()
-
-        image.save(os.path.join(savepath,f'{TRUE_CLASS_list[obj]}_{pose}_{j}.png'))
-
+            image.save(os.path.join(savepath,f'{TRUE_CLASS_list[obj]}_{pose}_{bg}_{j}.png'))
+            if j==0:
+              image.show()
+            if 0<=j<=10 or 350<=j<=360:
+              # if j%2==0:
+                image.save(os.path.join(validation_data_path,f'{TRUE_CLASS_list[obj]}_{pose}_{bg}_{j}.png'))
 
       print('images saved to ',savepath_list[obj])
-
-
-
-
-# from PIL import Image
-# for name in os.listdir("data/360/YAW/nobg/assault_rifle_YAW_360/images_lr2000"):
-
-#     image = Image.open(os.path.join("data/360/YAW/nobg/assault_rifle_YAW_360/images_lr2000", name))
-#     image = image.resize((299,299),Image.ANTIALIAS)
-#     image.save(os.path.join("data/360/YAW/nobg/assault_rifle_YAW_360/images_lr2000resized",'299'+name))
