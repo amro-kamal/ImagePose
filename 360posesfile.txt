@@ -30,7 +30,7 @@ electriclocomotive:
 wheelbarrow: 
    ROLL:  [gen_rotation_matrix(0, np.pi/10, degreep-np.pi/30), -6, 1]  ,#bg2, nobg=-6.5
    PITCH: [gen_rotation_matrix(0, degreep+np.pi/10, -np.pi/30) , -6, 1] , #bg2, nobg=-6.5
-   YAW: [gen_rotation_matrix(-np.pi/2.2, 0, degreep) , -6 , 1]
+   YAW: [gen_rotation_matrix(-np.pi/2.2, 0, degreep) , -6 , 1] , #bg2, nobg=-6.5
 
 
 mountainbike:

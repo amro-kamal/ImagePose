@@ -19,14 +19,14 @@ assault_rifle=413; white_shark=2; cannon=471; mug=504; keyboard=508; tablelamp=8
 # 1-choose an object
 # 2-choose a pose
 # 3-generate the images for all the bgs
-TRUE_CLASS_list = ['cannon']
-POSE = 'PITCH'
-pose = 'pitch' 
+TRUE_CLASS_list = ['wheelbarrow']
+POSE = 'YAW'
+pose = 'yaw' 
 bg = 'nobg'
 
 savepath_list = [f"newdata/360/{POSE}/{bg}/{TRUE_CLASS_list[0]}_{POSE}_360/images"]
 objectpath_list = [(f"objects/{TRUE_CLASS_list[0]}/{TRUE_CLASS_list[0]}.obj", f"objects/{TRUE_CLASS_list[0]}/{TRUE_CLASS_list[0]}.mtl")]
-bgpath_list = [f"backgrounds/{TRUE_CLASS_list[0]}_{bg}_500.jpg"]
+bgpath_list = [f"backgrounds/{TRUE_CLASS_list[0]}_{bg}_500.jpeg"]
 validation_data_path = f"newdata/datavalidation/{TRUE_CLASS_list[0]}/images"
 
 if not os.path.exists(f"newdata/360/{POSE}/{bg}/{TRUE_CLASS_list[0]}_{POSE}_360"):
@@ -64,7 +64,7 @@ if __name__ == "__main__":
       renderer.prog["y"].value = 0
       renderer.prog["z"].value = -6.5
       
-      renderer.prog["amb_int"].value = 0.75 #light
+      renderer.prog["amb_int"].value = 1.0 #light
       renderer.prog["dif_int"].value = 0.6
       DirLight = np.array([1.0, 1.0, 1.0])
       DirLight /= np.linalg.norm(DirLight)
@@ -76,7 +76,7 @@ if __name__ == "__main__":
             # Alter renderer parameters.
             degreep = j * (np.pi / 180)
             
-            R_obj = gen_rotation_matrix(np.pi/10, degreep+np.pi/30, 0)#yaw, pitch, roll
+            R_obj = gen_rotation_matrix(-np.pi/2.2, 0, degreep) #yaw, pitch, roll
             # if j==0 or j==180:
             #     renderer.prog["z"].value = -1
             # else:

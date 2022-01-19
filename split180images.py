@@ -35,10 +35,20 @@ for folder in os.listdir(f"newdata/360/{POSE}/{bg}"):
     # if len(os.listdir(f"newdata/360/{POSE}/{bg}/" + folder)) != 180 and len(os.listdir(f"newdata/360/{POSE}/{bg}/") + folder)) !=360:
         # raise Exception("Images number error: ", folder, len(os.listdir(f"newdata/360/{POSE}/{bg}/") + folder)))
     # print('folder: ',folder)
-
     if 'DS_Store' in folder:
         os.remove(os.path.join(f"newdata/360/{POSE}/{bg}/" + folder))
         continue
+
+    src_path = f"newdata/360/{POSE}/{bg}/{folder}/images"
+    dist_path = f"newdata/360Extra/{POSE}/{bg}/{folder}/images"
+
+    for img_name in os.listdir(src_path):
+        if 'DS_Store' in img_name:
+            os.remove(os.path.join(src_path, img_name))
+
+
+
+    print(folder, len(os.listdir(f"newdata/360/{POSE}/{bg}/{folder}/images")))
 
     if len(os.listdir(f"newdata/360/{POSE}/{bg}/{folder}/images")) > 200:
         print('okkkkkkkkkkk folder: ',folder)
@@ -59,6 +69,50 @@ for folder in os.listdir(f"newdata/360/{POSE}/{bg}"):
                 angle = int(img_name.split('.')[0].split('_')[-1])
                 if angle % 2 != 0:
                     move(os.path.join(src_path, img_name), dist_path)
+
+        
+
+    
+# if not os.path.exists(f'newdata/360Extra/datavalidation'):
+#     os.mkdir(f'newdata/360Extra/datavalidation')
+
+# ######################
+
+# for folder in os.listdir(f"newdata/datavalidation"):
+#     # if len(os.listdir(f"newdata/360/{POSE}/{bg}/" + folder)) != 180 and len(os.listdir(f"newdata/360/{POSE}/{bg}/") + folder)) !=360:
+#         # raise Exception("Images number error: ", folder, len(os.listdir(f"newdata/360/{POSE}/{bg}/") + folder)))
+#     # print('folder: ',folder)
+#     src_path = f"newdata/datavalidation/{folder}/images"
+#     dist_path = f"newdata/360Extra/datavalidation/{folder}/images"
+
+#     if 'DS_Store' in folder:
+#         os.remove(os.path.join(f"newdata/datavalidation/" + folder))
+#         continue
+
+            
+#     for img_name in os.listdir(src_path):
+#         if 'DS_Store' in img_name:
+#             os.remove(os.path.join(src_path, img_name))
+
+#     print(folder, len(os.listdir(f"newdata/datavalidation/{folder}/images")))
+#     if len(os.listdir(f"newdata/datavalidation/{folder}/images")) > 100:
+#         print('okkkkkkkkkkk folder: ',folder)
+
+
+
+#         if not os.path.exists(f"newdata/360Extra/datavalidation/{folder}"):
+#             os.mkdir(f"newdata/360Extra/datavalidation/{folder}")
+#         if not os.path.exists(f"newdata/360Extra/datavalidation/{folder}/images"):
+#             os.mkdir(f"newdata/360Extra/datavalidation/{folder}/images")
+        
+#         for img_name in os.listdir(src_path):
+#             if 'DS_Store' in img_name:
+#                 os.remove(os.path.join(src_path, img_name))
+
+#             else:
+#                 angle = int(img_name.split('.')[0].split('_')[-1])
+#                 if angle % 2 != 0:
+#                     move(os.path.join(src_path, img_name), dist_path)
 
         
 
