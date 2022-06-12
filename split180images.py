@@ -17,10 +17,10 @@ freightcar= 565; hourglass = 604; halftrack=586; revolver=763; moped=665; carria
 mountainbike=671; diningtable = 532; electricfan=545; trafficlight=920; hammerhead=4;
 
 
-####################
-POSE = 'PITCH'
-pose = 'pitch' 
-bg = 'nobg'
+###################
+POSE = 'IN_PLANE_ROLL'
+pose = 'in_plane_roll' 
+bg = 'bg2'
 
 if not os.path.exists(f'newdata/360Extra'):
     os.mkdir(f'newdata/360Extra')

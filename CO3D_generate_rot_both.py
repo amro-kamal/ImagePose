@@ -1,62 +1,68 @@
 import os
 from PIL import Image, ImageDraw
 import numpy as np
-def generate_rot_data(colorImage, pose, true_class, savepath):
-  for degree in range(0, 360, 2):
+import random
+import torchvision.transforms as transforms
+def generate_rot_data(colorImage, true_class, savepath, name):
+  for degree in range(10, 161, 10):
     height, width, _  = np.array(colorImage).shape
+    # print('color image ',np.array(colorImage).shape)
     rotated_img_arr = np.array(colorImage.rotate(degree, resample=Image.BICUBIC ))
-    black_cirlce = Image.new('RGB', [height,width] , color=(123, 116, 103)) #black image
+    # print('rotated_img_arr ',rotated_img_arr.shape)
+    black_cirlce = Image.new('RGB', [width,height] , color=(123, 116, 103)) #black image
+    # print('black ',np.array(black_cirlce).shape)
     draw = ImageDraw.Draw(black_cirlce) #white circle
-    draw.pieslice([(0,0), (height,width)], 0, 360, fill = 0, outline = "black")
+    draw.pieslice([(0,0), (width, height)], 0, 360, fill = 0, outline = "black")
 
     white_circle = Image.new('L', [height,width] , 0) #black image
+    # print('white_circle ',np.array(white_circle).shape)
     draw = ImageDraw.Draw(white_circle) #white circle
     draw.pieslice([(0,0), (height,width)], 0, 360, fill = 255, outline = "white")
     norm_white_circle = (np.array(white_circle).reshape(height,width,1)/255).astype(np.uint8)
-
-    img_circle = rotated_img_arr*norm_white_circle
-
+    # print('norm/_white_circle ',norm_white_circle.shape)
+    img_circle = rotated_img_arr*norm_white_circle #mask
+    
     final_img = Image.fromarray(np.array(black_cirlce)+img_circle)
 
-    final_img.save(os.path.join(savepath, f'{true_class}_{pose}_{degree}.png'), quality=100, subsampling=0)
+    final_img.save(os.path.join(savepath, f'{name}_{true_class}_{degree}.png'), quality=100, subsampling=0)
 
 
-#change the TRUE_CLASS and pose only
-
-
-TRUE_CLASSs = [ 'airliner' ,     'fireengine'  ,  'garbagetruck' ,  'mountainbike'  , 'shoppingcart'  , 'tractor',
-'barberchair'  , 'foldingchair' , 'hammerhead'  ,  'parkbench'    , 'tablelamp'    ,  'wheelbarrow',
-'cannon'   ,  'forklift' ,     'jeep'  ,     'rockingchair' ,  'tank' ]
-
-bg='nobg'
-
+#change the TRUE_CLASS
+TRUE_CLASSs = [ 'motorscooter', 'bench', 'bicycle']
+total_images=1000
+random.seed(10)
 for TRUE_CLASS in TRUE_CLASSs:
-  pose='roll'
+  
   print(TRUE_CLASS)
   ####################################
-  # savepath = f"data/rot_both360/ROLL/{bg}/{TRUE_CLASS}_ROLL_360/rot_both_images"
-  # colorImage  = Image.open(f"data/rot_both360/ROLL/{bg}/{TRUE_CLASS}_ROLL_360/baseline_images/{TRUE_CLASS}_{pose}_0_0.png")
 
-  # generate_rot_data(colorImage, pose=pose, true_class=TRUE_CLASS, savepath=savepath)
-
-  # savepath = f"data/rot_both360/ROLL/{bg}/{TRUE_CLASS}_ROLL_360/rot_both_images_lr600"
-  # colorImage  = Image.open(f"data/rot_both360/ROLL/{bg}/{TRUE_CLASS}_ROLL_360/baseline_images_lr600/{TRUE_CLASS}_{pose}_0_0.png")
-
-  # generate_rot_data(colorImage, pose=pose, true_class=TRUE_CLASS, savepath=savepath)
-  if not os.path.exists(f"newdata/rot_both360/ROLL/{bg}"):
-    os.mkdir(f"newdata/rot_both360/ROLL/{bg}")
-
-  if not os.path.exists(f"newdata/rot_both360/ROLL/{bg}/{TRUE_CLASS}_ROLL_360"):
-    os.mkdir(f"newdata/rot_both360/ROLL/{bg}/{TRUE_CLASS}_ROLL_360")
-    os.mkdir(f"newdata/rot_both360/ROLL/{bg}/{TRUE_CLASS}_ROLL_360/rot_both_images")
-
-  savepath = f"newdata/rot_both360/ROLL/{bg}/{TRUE_CLASS}_ROLL_360/rot_both_images"
-  colorImage  = Image.open(f"newdata/360/ROLL/{bg}/{TRUE_CLASS}_ROLL_360/images/{TRUE_CLASS}_{pose}_{bg}_0.png")
-
-  generate_rot_data(colorImage, pose=pose, true_class=TRUE_CLASS, savepath=savepath)
+  if not os.path.exists(f"newdata/CO3D_subset/CO3D_rot_both360/{TRUE_CLASS}"):
+    os.mkdir(f"newdata/CO3D_subset/CO3D_rot_both360/{TRUE_CLASS}")
+    os.mkdir(f"newdata/CO3D_subset/CO3D_rot_both360/{TRUE_CLASS}/images")
 
 
 
+  savepath = f"newdata/CO3D_subset/CO3D_rot_both360/{TRUE_CLASS}/images"
+  i=0
+  for folder in os.listdir(f"newdata/CO3D_subset/{TRUE_CLASS}"):
+      
+      if folder =='.DS_Store':
+          continue
+      folder_images = os.listdir(f"newdata/CO3D_subset/{TRUE_CLASS}/{folder}/images")
+      n_images = 2 if TRUE_CLASS=='motorscooter' else 1
+      random_images = random.sample(folder_images, n_images)
+
+      for random_image in random_images:
+        colorImage  = Image.open(f"newdata/CO3D_subset/{TRUE_CLASS}/{folder}/images/{random_image}")
+        colorImage = transforms.Resize((500, 500))(colorImage)
+        #   print(np.array(colorImage).shape)
+        generate_rot_data(colorImage, true_class=TRUE_CLASS, savepath=savepath, name=folder+random_image)
+        i+=16
+
+      if i>=total_images:
+          break
+
+  
 
 
 

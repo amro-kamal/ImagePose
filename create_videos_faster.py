@@ -58,11 +58,11 @@ def rename_img(model_name, outputpath,names_file, names_file5, save_path,pose='p
 
     '''
         
-    if os.path.isdir(os.path.join(save_path, 'rot_bg_images_lr600')):
-        images_path = os.path.join(save_path, 'rot_bg_images_lr600')
+    if os.path.isdir(os.path.join(save_path, 'images_lr600')):
+        images_path = os.path.join(save_path, 'images_lr600')
         print('Using 600x600 images')
     else:
-        images_path = os.path.join(save_path, 'rot_bg_images')
+        images_path = os.path.join(save_path, 'images')
         print('Using 299x299 images')
     print('Images will be saved to,',os.path.join(save_path, f'renamed_images_top'))
 
@@ -77,7 +77,6 @@ def rename_img(model_name, outputpath,names_file, names_file5, save_path,pose='p
     with open(names_file, "r") as ymlfile:
         result = yaml.load(ymlfile)
 
-
     for (image_name, classification) in result.items():                                    
         classification_top5 = result5[image_name][0]
         pred_class = imagenet_classes[result5[image_name][1][0]].split(',')[0]
@@ -91,15 +90,15 @@ def rename_img(model_name, outputpath,names_file, names_file5, save_path,pose='p
         image = Image.open(os.path.join(images_path, image_name)).resize((600,600))
         image_top5 = copy.deepcopy(image)
         correct = Image.open('icons/correct.png')
-        correct = correct.resize((70,70))
+        correct = correct.resize((90,90))
         wrong = Image.open('icons/wrong.png')
-        wrong = wrong.resize((70,70))
+        wrong = wrong.resize((90,90))
 
         start1 = time.time()
 
         mask_im = Image.new("L", correct.size, 0)
         draw = ImageDraw.Draw(mask_im)
-        draw.ellipse((5, 5, 65, 65), fill=255)
+        draw.ellipse((5, 5, 85, 85), fill=255)
         if classification == 'correct':
           image.paste(correct, (280, 10),mask_im)
         elif classification == 'wrong':
@@ -108,6 +107,12 @@ def rename_img(model_name, outputpath,names_file, names_file5, save_path,pose='p
           image_top5.paste(correct, (280, 10),mask_im)
         elif classification_top5 == 'wrong':
           image_top5.paste(wrong, (280, 10),mask_im)
+
+        # add the predicted class
+        font = ImageFont.truetype("JosefinSans-Bold.ttf", 70)
+
+        d = ImageDraw.Draw(image)
+        # d.text((10,65), pred_class , font=font, fill=(0,0,0))
 
         # if result5[image_name][1][0] in correct_class:
         #   image.paste(correct, (280, 10),mask_im)
@@ -126,20 +131,30 @@ def rename_img(model_name, outputpath,names_file, names_file5, save_path,pose='p
         if pose=='yaw' or pose=='pitch' or pose=='roll':
             p1 = image_name.split('.')[0].split('_')[-1]
             p2 = 0
-            new_name = '_'.join([class_name, model_name, pose, p1, pred_class, classification+'.'+image_name.split('.')[1]])
-            new_name_top5 = '_'.join([class_name, model_name, pose, p1, pred_class, classification_top5+'.'+image_name.split('.')[1]])
+            new_name = '_'.join([class_name, model_name, pose, p1, pred_class, classification+'.'+'png']) #image_name.split('.')[1]])
+            new_name_top5 = '_'.join([class_name, model_name, pose, p1, pred_class, classification_top5+'.'+'png']) #image_name.split('.')[1]])
 
         else:
             p1=image_name.split('.')[0].split('_')[-2]
             p2=image_name.split('.')[0].split('_')[-1]
-            new_name = '_'.join([class_name, model_name, pose, p1, p2, pred_class, classification+'.'+image_name.split('.')[1]])
-            new_name_top5 = '_'.join([class_name, model_name, pose, p1, p2, pred_class, classification_top5+'.'+image_name.split('.')[1]])
+            new_name = '_'.join([class_name, model_name, pose, p1, p2, pred_class, classification+'.'+'png']) #mage_name.split('.')[1]])
+            new_name_top5 = '_'.join([class_name, model_name, pose, p1, p2, pred_class, classification_top5+'.'+'png']) #image_name.split('.')[1]])
+        
 
+        if not os.path.exists(os.path.join(save_path, 'renamed_images_top1')):
+            os.mkdir(os.path.join(save_path, 'renamed_images_top1'))
+        
+        if not os.path.exists(os.path.join(save_path, 'renamed_images_top1', model_name)):
+            os.mkdir(os.path.join(save_path, 'renamed_images_top1', model_name))
+
+            
+        image.save(os.path.join(save_path, 'renamed_images_top1', model_name, new_name))
         ############# bar plot ###############
         ############# bar plot ###############
         indices, values = result5[image_name][1], result5[image_name][2] #result5 = {image_name: [correct/wrong , indices, probs]}
         objects = tuple([imagenet_classes[indices[c]].split(',')[0] for c in range(len(indices))][::-1])
         color = ['green' if (indices[c] in correct_class) else 'cyan' for c in range(len(indices))]
+        if color[0]=='cyan': color[0]='red'
         green = False
         for i, c in enumerate(color):
           if c=='green' and green==True:
@@ -152,11 +167,11 @@ def rename_img(model_name, outputpath,names_file, names_file5, save_path,pose='p
         y_pos = np.arange(len(objects))
         plots = plt.barh(y_pos, probs, align='center', alpha=0.5, color=color)
 
-        plt.yticks(y_pos, objects)
-        plt.xlabel('probability')
-        plt.ylabel('classes')
+        plt.yticks(y_pos, objects, fontsize=16)
+        plt.xlabel('probability', fontsize=16)
+        # plt.ylabel('classes')
         plt.xlim(0, 1)
-        plt.title(f'{model_name} | Top5 probabilities | {pose} degrees: {p1} & {p2}')
+        plt.title(f'{model_name}', fontsize=16)
         plt.grid(color = 'grey', linestyle = '--', linewidth = 0.5,alpha=0.8)
         for bar in plots.patches:
             plt.text(bar.get_width()+0.01, bar.get_y()+0.4,
@@ -242,48 +257,67 @@ if __name__=='__main__':
 
 ####################
     # model_names = ['resnet50', 'resnet152', 'simclr-resnet50x1']
-    model_names = ['BiTM-resnetv2-152x2', ]
+    model_names = ['Efficientnet_l2_475_noisy_student'] #['Beit_L16_224']  # ['BiTM_resnetv2_152x2_448']#
     jeep=609; bench=703; ambulance=407; traffic_light=920; forklift=561; umbrella=879; airliner=404; 
     assault_rifle=413; whiteshark=2; tigershark=3; cannon=471; mug=504; keyboard=508; tablelamp=846; lampshade=619;
-    containership = 510; cup=968;
-
+    containership = 510; cup=968; shoppingcart=791; tractor=866; hammerhead=4; rockingchair=765
+    mountainbike = 671;
+    AIRLINER=404;  BARBERCHAIR = 423; CANNON=471; FIREENGINE=555; FOLDINGCHAIR=559; FORKLIFT=561;
+    GARBAGETRUCK = 569; HAMMERHEAD=4; JEEP=609; MOUNTAINBIKE = 671; PARKBENCH=703; ROCKINGCHAIR=765; SHOPPINGCART=791;
+    TABLELAMP=846; LAMPSHADE=619; TANK = 847;  TRACTOR = 866; WHEELBARROW = 428; 
+    true_class_dict = { 'forklift':[FORKLIFT] }
+    # {'airliner': [AIRLINER], 'barberchair': [BARBERCHAIR], 'cannon':[CANNON], 'fireengine':[FIREENGINE], 'foldingchair':[FOLDINGCHAIR],
+    #  'forklift':[FORKLIFT], 'garbagetruck':[GARBAGETRUCK], 'hammerhead':[HAMMERHEAD], 'jeep':[JEEP], 'mountainbike':[MOUNTAINBIKE],
+    #  'parkbench':[PARKBENCH], 'rockingchair':[ROCKINGCHAIR], 'shoppingcart':[SHOPPINGCART],
+    #  'tablelamp':[TABLELAMP, LAMPSHADE], 'tank':[TANK], 'tractor':[TRACTOR], 'wheelbarrow':[WHEELBARROW] }
 ####################
     # loader, jeep , lamp
-    correct_class = [[jeep]]*3 
-    obj = 'brownjeep'
-    pose = ['roll','roll','roll']
-    bgs = ['bg1'] #['bg1','bg2','nobg']
-    POSE = 'ROLL'
+    for name, c in true_class_dict.items():
+        print(name)
+        correct_class = [c]*3 
+        obj = name
+        pose = ['roll'] #['roll','roll','roll']
+        bgs = ['bg1'] #['bg1','bg2','nobg']
+        POSE = 'ROLL'
 
-####################
+    ####################
 
-    savepath  = [f"data/rot_bg360/{POSE}/{bg}/{obj}_{POSE}_360/rot_bg_model_result" for bg in bgs]
-    data_root_path = [f"data/rot_bg360/{POSE}/{bg}/{obj}_{POSE}_360/" for bg in bgs]
+        # savepath  = [f"data/rot_bg360/{POSE}/{bg}/{obj}_{POSE}_360/rot_bg_model_result" for bg in bgs]
+        # data_root_path = [f"data/rot_bg360/{POSE}/{bg}/{obj}_{POSE}_360/" for bg in bgs]
 
-    # data_root_path  = [f"data/360/{POSE}/{bg}/{obj}_{POSE}_360/" for bg in bgs]
-    # savepath = [f"data/360/{POSE} result/result/{bg}/{obj}_{POSE}_360/" for bg in bgs] 
+        # data_root_path  = [f"data/360/{POSE}/{bg}/{obj}_{POSE}_360/" for bg in bgs]
+        # savepath = [f"data/360/{POSE} result/result/{bg}/{obj}_{POSE}_360/" for bg in bgs] 
 
-######################################################################
+        savepath = [f"newdata/360/{POSE}/{bg}/{obj}_{POSE}_360/model_result" for bg in bgs] 
+        data_root_path = [f"newdata/360/{POSE}/{bg}/{obj}_{POSE}_360" for bg in bgs]
 
-    for m in range(len(model_names)):
-        print('current model : ',model_names[m])
-        for i in range(len(savepath)):
-          start = time.time()
-
-          print(f'working on object number {i+1}/{len(savepath)}')
-
-          # rename the images with the classifications 
-
-          rename_img(model_name=model_names[m], outputpath=savepath[i],
-                    names_file=os.path.join(savepath[i], model_names[m],model_names[m]+'_result.yml'), names_file5=os.path.join(savepath[i],model_names[m], model_names[m]+'_result5.yml'), 
-                    save_path=data_root_path[i], pose=pose[i], correct_class=correct_class[i])
-
-          print('total time per bg: ',time.time()-start)
-
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+        # ROLLPITCH
+        # savepath = [f"newdata/360/{POSE}/result/{bg}/{obj}_{POSE}_360/" for bg in bgs] 
+        # data_root_path = [f"newdata/360/{POSE}/{bg}/{obj}_{POSE}_360" for bg in bgs]
 
 
+    ######################################################################
 
+        for m in range(len(model_names)):
+            print('current model : ',model_names[m])
+            for i in range(len(savepath)):
+                start = time.time()
+
+                print(f'working on object number {i+1}/{len(savepath)}')
+
+                # rename the images with the classifications 
+
+                rename_img(model_name=model_names[m], outputpath=savepath[i],
+                            names_file=os.path.join(savepath[i], model_names[m],model_names[m]+'_result.yml'), names_file5=os.path.join(savepath[i],model_names[m], model_names[m]+'_result5.yml'), 
+                            save_path=data_root_path[i], pose=pose[i], correct_class=correct_class[i])
+
+                print('total time per bg: ',time.time()-start)
+
+    #$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+# EN: mb, roll, bg1 | jeep, pitch, bg2 | rc, p, bg2 | fc, p, bg2 | tank, y, bg1 | tactor, y, bg2 | bc, y, bg1
+# Beit: mb,p,bg1 | fl,r,bg1 | tl,p,bg1 | j, r,bg1 | rc,p,bg1 | a,r,bg1
 
 # import matplotlib; matplotlib.use('agg')
 # import torch

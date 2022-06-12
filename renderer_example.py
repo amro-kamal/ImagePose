@@ -36,8 +36,8 @@ if __name__ == "__main__":
     renderer.prog["z"].value = -2
 
     renderer.prog["amb_int"].value = 0.7
-    renderer.prog["dif_int"].value = 0.9
-    DirLight = np.array([1.0, 1.0, 1.0])
+    renderer.prog["dif_int"].value = .9
+    DirLight = np.array([0.3, 0.1, 1.0])
     DirLight /= np.linalg.norm(DirLight)
     renderer.prog["DirLight"].value = tuple(DirLight)
 
@@ -85,3 +85,5 @@ if __name__ == "__main__":
     #     image.save("camera.png")
     # else:
     #     image.show()
+
+

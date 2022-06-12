@@ -154,7 +154,8 @@ def parse_mtl_file(input_mtl):
 class Renderer:
     def __init__(
         self, obj_f, mtl_f, background_f=None, camera_distance=2.0, angle_of_view=16.426
-    ):
+    ):  
+        self.background_f = background_f
         # Initialize OpenGL context.
         self.ctx = moderngl.create_standalone_context()
         # Render depth appropriately.
@@ -285,7 +286,7 @@ class Renderer:
 
         # Set up background.
         self.prog = prog
-        (window_width, window_height) = self.set_up_background(background_f)
+        (window_width, window_height) = self.set_up_background(self.background_f)
 
         # Look at origin matrix.
         eye = np.array([0.0, 0.0, camera_distance])

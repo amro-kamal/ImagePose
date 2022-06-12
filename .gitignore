@@ -11,3 +11,6 @@ test.gif
 power_drill
 cma-es-report.pdf
 .DS_store
+gridplots/*
+temp_images/*
+wrongpredgrid/*

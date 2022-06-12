@@ -14,14 +14,17 @@ containership = 510; cup=968; warplane=895; tigershark=3; tench=0; sea_snake = 6
 tiger_beetle = 300; amphibian=408;  motorscooter  = 670; diningtable=532;  tractor = 866;
 golfcart=575; movingvan=675; trailertruck=867; electriclocomotive=547;  foldingchair=559;
 freightcar= 565; hourglass = 604; halftrack=586; revolver=763; moped=665; carriage=705; horsecart = 603; sportcar = 817
-mountainbike=671; diningtable = 532; electricfan=545; trafficlight=920; hammerhead=4;
+mountainbike=671; diningtable = 532; electricfan=545; trafficlight=920; hammerhead=4;  tricycle = 870; unicycle=880;
+microwave=651; mixingbowl=659; soupbowl=809; banana=954; hotdog=934; afghanhound=160;
+germanshepherd= 235; whiskeyjug=901; siamang=369; swab=840; microwave = 651
 
 
 ####################
 labels_path = 'imagenet_val_labels.yml'
-obj = hammerhead
-obj_name = 'hammerhead'
+obj = microwave
+obj_name = 'microwave_651'
 ######################
+
 with open(labels_path, "r") as ymlfile:
         labels = yaml.load(ymlfile)
 
