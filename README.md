@@ -1,9 +1,9 @@
 The code for rendering 3d objects in this repo is from the [Strike (With) A Pose](https://github.com/airalcorn2/strike-with-a-pose) repo.
-# ImagePose
-Are vision models robust against uncommon poses?
+# ObjectPose Dataset
+Are vision models robust against Unusual poses?
 
 
-| Model         | Source | Model Name| Dataset | Params | IN acc | repo |
+<!-- | Model         | Source | Model Name| Dataset | Params | IN acc | repo |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Resnet50  | torchvision | ResNet50 | ImageNet(1M) | 25M | 79.3% |
 | Resnet152 | torchvision | ResNet152 | ImageNet(1M) | 69M | 80.1% |
@@ -51,7 +51,7 @@ Are vision models robust against uncommon poses?
 | Deit_S16 | timm | Deit_small_16_224 | ImageNet(1M) | 22M | 81.2% | https://github.com/facebookresearch/deit
 | | | | | | |
 | EffN_b7_NS | timm | Efficientnet_b7_noisy_student | JFT(300M) | 66M | 86.9% | efficientnet#2-using-pretrained-efficientnet-checkpoints
-| EffN_l2_NS | timm | Efficientnet_l2_noisy_student |  JFT(300M) | 480M|  88.4% | efficientnet#2-using-pretrained-efficientnet-checkpoints
+| EffN_l2_NS | timm | Efficientnet_l2_noisy_student |  JFT(300M) | 480M|  88.4% | efficientnet#2-using-pretrained-efficientnet-checkpoints -->
 
 
 **Some Samples from the data:**
