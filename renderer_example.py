@@ -29,11 +29,11 @@ if __name__ == "__main__":
     print(probs[0][target_class].item())
 
     # Alter renderer parameters.
-    R_obj = gen_rotation_matrix(np.pi / 4, np.pi / 4, 0)
+    R_obj = gen_rotation_matrix(np.pi / 2, 0, 0) #yaw, pitch, roll
     renderer.prog["R_obj"].write(R_obj.T.astype("f4").tobytes())
     renderer.prog["x"].value = 0.0
     renderer.prog["y"].value = 0.0
-    renderer.prog["z"].value = -2
+    renderer.prog["z"].value = -10
 
     renderer.prog["amb_int"].value = 0.7
     renderer.prog["dif_int"].value = .9

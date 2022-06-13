@@ -7,18 +7,6 @@ import numpy as np
 jeep=609; brownjeep=609; bench=703; ambulance=407; traffic_light=920; forklift=561; umbrella=879; airliner=404; 
 assault_rifle=413; white_shark=2; cannon=471; mug=504; keyboard=508; tablelamp=846;
 
-# savepath_list = ["data/360/ROLL/bg1/airliner_ROLLPITCH_360/images", "data/360/ROLLPITCH/bg1/ambulance_ROLLPITCH_360/images",
-#                  "data/360/ROLLPITCH/bg1/loader_ROLLPITCH_360/images", "data/360/ROLLPITCH/bg1/brownjeep_ROLLPITCH_360/images"]
-
-# objectpath_list = [("objects/jeep/jeep.obj", "objects/jeep/jeep.mtl"), ("objects/ambulance/ambulance.obj", "objects/ambulance/ambulance.mtl"),
-#                    ("objects/loader/loader.obj", "objects/loader/loader.mtl"), ("objects/brownjeep/brownjeep.obj", "objects/brownjeep/brownjeep.mtl")]
-
-# bgpath_list = ["backgrounds/sky.jpg", "backgrounds/sky.jpg", "backgrounds/sky.jpg", "backgrounds/sky.jpg"]
-# pose = 'rollpitch'
-
-# 1-choose an object
-# 2-choose a pose
-# 3-generate the images for all the bgs
 
 
 # rockingchair:

@@ -24,8 +24,6 @@ import PIL
 #1- ImagePoseData class
 
 #To delete the .DS_Store file (needed for MacOS ONLY) use the command: find . -name '.#DS_Store' -type f -delete
-jeep=609; bench=703; ambulance=407; traffic_light=920; forklift=561; umbrella=879; airliner=404; 
-assault_rifle=413; white_shark=2; cannon=471; mug=504; keyboard=508
 
 def clear_folder(path):
     if os.path.isdir(path):

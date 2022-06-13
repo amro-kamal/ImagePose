@@ -15,3 +15,8 @@ gridplots/*
 temp_images/*
 wrongpredgrid/*
 model_vs_human/*
+createdata.py
+split180images.py
+split_IN_val.py
+seperate_CO3d.py
+prev code.py
